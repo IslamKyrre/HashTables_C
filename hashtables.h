@@ -13,7 +13,6 @@ typedef struct HashTable {
 } HashTable;
 
 
-
 HashTable *init_hashtable(int buffer_size);
 
 void remove_hashtable(HashTable *table);
@@ -22,8 +21,9 @@ int hash(int key, int buffer_size);
 
 int find_key(int key, HashTable *table);
 
+void rehash(HashTable *table);
 
-void insert_key(int key, HashTable *table;
+void insert_key(int key, HashTable *table);
 
 void remove_key(int key, HashTable *table);
 

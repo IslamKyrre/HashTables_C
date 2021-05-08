@@ -49,9 +49,34 @@ int find_key(const int key, HashTable *table) {
     return 0;
 }
 
+void rehash(HashTable *table) {
+
+
+    Node **tmp = table->nodes;
+    table->bufferSize *= 2;
+    table->size = 0;
+    table->nodes = (Node **) malloc(table->bufferSize * sizeof(Node *));
+
+
+    for (int i = 0; i < table->bufferSize; ++i) {
+        table->nodes[i] = NULL;
+    }
+
+    for (int i = 0; i < table->bufferSize / 2; ++i) {
+        if (tmp[i] != NULL) {
+            if (!tmp[i]->deleted)
+                insert_key(tmp[i]->data, table);
+            free(tmp[i]);
+        }
+    }
+    free(tmp);
+}
+
 
 void insert_key(const int key, struct HashTable *table) {
 
+    if (3 * table->bufferSize <= 4 * (table->size + 1))
+        rehash(table);
 
     int hashed = hash(key, table->bufferSize);
     int i = 0;
