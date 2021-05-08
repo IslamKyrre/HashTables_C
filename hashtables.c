@@ -3,7 +3,20 @@
 
 #include "hashtables.h"
 
+int check_arg(int arg) {
+    if (arg < 0) return 0;
+    while (arg > 1) {
+        if (arg % 2) return 0;
+        arg /= 2;
+    }
+    return 1;
+}
+
 HashTable *init_hashtable(int buffer_size) {
+
+    if (!check_arg(buffer_size)) {
+        return NULL;
+    }
 
     HashTable *my_table = (HashTable *) malloc(sizeof(HashTable));
 

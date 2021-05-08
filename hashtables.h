@@ -12,6 +12,7 @@ typedef struct HashTable {
     Node **nodes;
 } HashTable;
 
+int check_arg(int arg);
 
 HashTable *init_hashtable(int buffer_size);
 
