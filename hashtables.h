@@ -36,5 +36,6 @@ void insert_key(int key, HashTable *table, HASHTABLES_ERR *err);
 
 void remove_key(int key, HashTable *table, HASHTABLES_ERR *err);
 
+void print_table(HashTable *table, HASHTABLES_ERR *err);
 
 #endif

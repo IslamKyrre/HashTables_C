@@ -58,6 +58,11 @@ int main() {
     else
         fprintf(stdout, "Test\t->\tPASSED\n");
 
+    print_table(table, &err);
+    if (err != ESUCCESS)
+        fprintf(stdout, "Test\t->\tFAILED\n");
+    else
+        fprintf(stdout, "Test\t->\tPASSED\n");
 
 
     remove_key(3, table, &err);
@@ -73,7 +78,12 @@ int main() {
     else
         fprintf(stdout, "Test\t->\tPASSED\n");
 
-
+    print_table(table, &err);
+    if (err != ESUCCESS)
+        fprintf(stdout, "Test\t->\tFAILED\n");
+    else
+        fprintf(stdout, "Test\t->\tPASSED\n");
+    
 
     remove_hashtable(table, &err);
     if (err != ESUCCESS)

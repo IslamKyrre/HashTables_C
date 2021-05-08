@@ -217,3 +217,25 @@ void remove_key(const int key, struct HashTable *table, HASHTABLES_ERR *err) {
         hashed %= table->bufferSize;
     }
 }
+
+void print_table(HashTable *table, HASHTABLES_ERR *err) {
+    if (table == NULL) {
+        fprintf(stderr, "Invalig argument: hashtable\n");
+        if (err != NULL)
+            *err = EINVARG;
+        return;
+    }
+
+    if (table->size == 0) {
+        printf("No elements in hashtable\n");
+        return;
+    }
+
+    for (int i = 0; i < table->bufferSize; ++i) {
+        if (table->nodes[i] != NULL && !table->nodes[i]->deleted) {
+            printf("%d ", table->nodes[i]->data);
+        }
+    }
+    printf("\n");
+    *err = ESUCCESS;
+}
