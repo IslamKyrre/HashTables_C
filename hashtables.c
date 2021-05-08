@@ -12,25 +12,38 @@ int check_arg(int arg) {
     return 1;
 }
 
-HashTable *init_hashtable(int buffer_size) {
+HashTable *init_hashtable(int buffer_size, HASHTABLES_ERR *err) {
 
     if (!check_arg(buffer_size)) {
+        fprintf(stderr, "Invalig argument: buffer_size\n"
+                        "Consider that buffer_size should be a pow of 2\n");
+        if (err != NULL)
+            *err = EINVARG;
         return NULL;
     }
 
     HashTable *my_table = (HashTable *) malloc(sizeof(HashTable));
 
+
     my_table->size = 0;
     my_table->bufferSize = buffer_size;
     my_table->nodes = (Node **) malloc(buffer_size * sizeof(Node *));
 
+
     for (int i = 0; i < buffer_size; ++i) {
         my_table->nodes[i] = NULL;
     }
+    *err = ESUCCESS;
     return my_table;
 }
 
-void remove_hashtable(HashTable *table) {
+void remove_hashtable(HashTable *table, HASHTABLES_ERR *err) {
+    if (table == NULL) {
+        fprintf(stderr, "Invalig argument: hashtable\n");
+        if (err != NULL)
+            *err = EINVARG;
+        return;
+    }
 
     for (int i = 0; i < table->bufferSize; ++i) {
         if (table->nodes[i] != NULL) {
@@ -41,29 +54,47 @@ void remove_hashtable(HashTable *table) {
         free(table->nodes);
     }
     free(table);
+    *err = ESUCCESS;
 }
 
 int hash(int key, int buffer_size) {
     return abs(key) % buffer_size;
 }
 
-int find_key(const int key, HashTable *table) {
+int find_key(const int key, HashTable *table, HASHTABLES_ERR *err) {
+
+    if (table == NULL) {
+        fprintf(stderr, "Invalig argument: hashtable\n");
+        if (err != NULL)
+            *err = EINVARG;
+        return 0;
+    }
 
     int hashed = hash(key, table->bufferSize);
     int i = 0;
     while (table->nodes[hashed] != NULL && i < table->bufferSize) {
         if (!table->nodes[hashed]->deleted && table->nodes[hashed]->data == key) {
+            *err = ESUCCESS;
             return 1;
         }
         i++;
         hashed += (i * i + i) / 2;
         hashed %= table->bufferSize;
     }
+
+    *err = ESUCCESS;
     return 0;
 }
 
-void rehash(HashTable *table) {
 
+void rehash(HashTable *table, HASHTABLES_ERR *err) {
+
+    if (table == NULL) {
+        fprintf(stderr, "Invalig argument: hashtable\n");
+        if (err != NULL)
+            *err = EINVARG;
+        return;
+    }
 
     Node **tmp = table->nodes;
     table->bufferSize *= 2;
@@ -78,18 +109,32 @@ void rehash(HashTable *table) {
     for (int i = 0; i < table->bufferSize / 2; ++i) {
         if (tmp[i] != NULL) {
             if (!tmp[i]->deleted)
-                insert_key(tmp[i]->data, table);
+                insert_key(tmp[i]->data, table, err);
             free(tmp[i]);
         }
     }
     free(tmp);
+    *err = ESUCCESS;
 }
 
+void insert_key(const int key, struct HashTable *table, HASHTABLES_ERR *err) {
 
-void insert_key(const int key, struct HashTable *table) {
+    if (table == NULL) {
+        fprintf(stderr, "Invalig argument: hashtable\n");
+        if (err != NULL)
+            *err = EINVARG;
+        return;
+    }
+
+    if (find_key(key, table, err)) {
+        fprintf(stderr, "The key found in hashtable already\n");
+        if (err != NULL)
+            *err = EINSERT;
+        return;
+    }
 
     if (3 * table->bufferSize <= 4 * (table->size + 1))
-        rehash(table);
+        rehash(table, err);
 
     int hashed = hash(key, table->bufferSize);
     int i = 0;
@@ -97,15 +142,16 @@ void insert_key(const int key, struct HashTable *table) {
         if (table->nodes[hashed] == NULL) {
             table->nodes[hashed] = (Node *) malloc(sizeof(Node));
 
-
             table->nodes[hashed]->data = key;
             table->nodes[hashed]->deleted = 0;
             table->size++;
+            *err = ESUCCESS;
             return;
         } else if (table->nodes[hashed]->deleted) {
             table->nodes[hashed]->data = key;
             table->nodes[hashed]->deleted = 0;
             table->size++;
+            *err = ESUCCESS;
             return;
         }
         i++;
@@ -114,8 +160,21 @@ void insert_key(const int key, struct HashTable *table) {
     }
 }
 
-void remove_key(const int key, struct HashTable *table) {
+void remove_key(const int key, struct HashTable *table, HASHTABLES_ERR *err) {
 
+    if (table == NULL) {
+        fprintf(stderr, "Invalig argument: hashtable\n");
+        if (err != NULL)
+            *err = EINVARG;
+        return;
+    }
+
+    if (!find_key(key, table, err)) {
+        fprintf(stderr, "The key was not found in hashtable\n");
+        if (err != NULL)
+            *err = EREMOVE;
+        return;
+    }
 
     int hashed = hash(key, table->bufferSize);
     int i = 0;
@@ -124,6 +183,7 @@ void remove_key(const int key, struct HashTable *table) {
         if (!table->nodes[hashed]->deleted && table->nodes[hashed]->data == key) {
             table->nodes[hashed]->deleted = 1;
             table->size--;
+            *err = ESUCCESS;
             return;
         }
         i++;
