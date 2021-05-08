@@ -24,10 +24,23 @@ HashTable *init_hashtable(int buffer_size, HASHTABLES_ERR *err) {
 
     HashTable *my_table = (HashTable *) malloc(sizeof(HashTable));
 
+    if (my_table == NULL) {
+        fprintf(stderr, "Not enough memory\n");
+        if (err != NULL)
+            *err = EMALLOC;
+        return NULL;
+    }
 
     my_table->size = 0;
     my_table->bufferSize = buffer_size;
     my_table->nodes = (Node **) malloc(buffer_size * sizeof(Node *));
+
+    if (my_table->nodes == NULL) {
+        fprintf(stderr, "Not enough memory\n");
+        if (err != NULL)
+            *err = EMALLOC;
+        return NULL;
+    }
 
 
     for (int i = 0; i < buffer_size; ++i) {
@@ -101,6 +114,12 @@ void rehash(HashTable *table, HASHTABLES_ERR *err) {
     table->size = 0;
     table->nodes = (Node **) malloc(table->bufferSize * sizeof(Node *));
 
+    if (table->nodes == NULL) {
+        fprintf(stderr, "Not enough memory\n");
+        if (err != NULL)
+            *err = EMALLOC;
+        return;
+    }
 
     for (int i = 0; i < table->bufferSize; ++i) {
         table->nodes[i] = NULL;
@@ -141,6 +160,13 @@ void insert_key(const int key, struct HashTable *table, HASHTABLES_ERR *err) {
     while (i < table->bufferSize) {
         if (table->nodes[hashed] == NULL) {
             table->nodes[hashed] = (Node *) malloc(sizeof(Node));
+
+            if (table->nodes == NULL) {
+                fprintf(stderr, "Not enough memory\n");
+                if (err != NULL)
+                    *err = EMALLOC;
+                return;
+            }
 
             table->nodes[hashed]->data = key;
             table->nodes[hashed]->deleted = 0;

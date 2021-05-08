@@ -14,6 +14,7 @@ typedef struct HashTable {
 
 typedef enum {
     ESUCCESS = 0,
+    EMALLOC,
     EINSERT,
     EREMOVE,
     EINVARG
